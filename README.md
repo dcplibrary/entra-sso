@@ -1,4 +1,4 @@
-# Entra SSO Package for Laravel 12
+# Entra SSO Package for Laravel
 
 A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with role mapping, group sync, token refresh, and custom claims support.
 
@@ -129,7 +129,7 @@ Route::middleware(['auth', 'entra.group:IT Admins'])->group(function () {
 See the complete setup guide for:
 - [Azure AD configuration](docs/AZURE_SETUP.md)
 - Role mapping setup
-- Custom claims configuration
+- [Custom claims configuration](docs/CUSTOM_CLAIMS.md)
 - Token refresh details
 - Troubleshooting
 
