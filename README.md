@@ -128,10 +128,10 @@ Route::middleware(['auth', 'entra.group:IT Admins'])->group(function () {
 
 See the complete setup guide for:
 - [Azure AD configuration](docs/AZURE_SETUP.md)
-- Role mapping setup
+- [Role mapping setup](docs/ROLE_MAPPING.md)
 - [Custom claims configuration](docs/CUSTOM_CLAIMS.md)
-- Token refresh details
-- Troubleshooting
+- [Token refresh details](docs/TOKEN_REFRESH.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
 
 ## License
 
