@@ -117,7 +117,7 @@ The package provides a base User model (`src/Models/User.php`) that Laravel apps
 - `getCustomClaims(): array` - Get all custom claims
 
 **App User Model Integration**:
-Laravel apps should extend the package User model. **Only ONE change is required** to your default Laravel User model:
+Laravel apps should extend the package User model. **Two changes are required** to your default Laravel User model:
 
 ```php
 namespace App\Models;
@@ -160,7 +160,20 @@ class User extends EntraUser
 
 **CRITICAL: What You Must Change in Your Laravel App's User Model**:
 
-✅ **REQUIRED** - Change the `casts()` method:
+✅ **REQUIRED CHANGE #1** - Add import and change class extension:
+```php
+// ❌ DEFAULT Laravel User model
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class User extends Authenticatable
+
+// ✅ REQUIRED Fix - Import EntraUser and extend it
+use Dcplibrary\EntraSSO\Models\User as EntraUser;
+
+class User extends EntraUser
+```
+
+✅ **REQUIRED CHANGE #2** - Change the `casts()` method:
 ```php
 // ❌ DEFAULT Laravel - This will BREAK Entra SSO
 protected function casts(): array
@@ -190,8 +203,14 @@ protected function casts(): array
 **What you DON'T need to change:**
 - ✅ `$fillable` - Entra fields are automatically merged via the package's `getFillable()` override
 - ✅ `$hidden` - Can stay as-is
-- ✅ Class name, namespace, traits - Keep your existing setup
+- ✅ Class name (`User`), namespace (`App\Models`) - Keep your existing names
+- ✅ Traits (`HasFactory`, `Notifiable`) - Keep your existing traits
 - ✅ Helper methods - Automatically inherited, no need to add anything
+
+**Summary of Required Changes:**
+1. Add `use Dcplibrary\EntraSSO\Models\User as EntraUser;` import
+2. Change `class User extends Authenticatable` to `class User extends EntraUser`
+3. Change `casts()` method to merge with `parent::casts()`
 
 ### Database
 Migration adds these fields to users table:
