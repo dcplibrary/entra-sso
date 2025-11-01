@@ -15,38 +15,35 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
 
 ## Installation
 
-### 1. Add to Laravel Project
+### Quick Install (Recommended)
 
-Add to your Laravel project's `composer.json`:
-
-```json
-{
-    "repositories": [
-        {
-            "type": "path",
-            "url": "./entra-sso"
-        }
-    ],
-    "require": {
-        "dcplibrary/entra-sso": "*"
-    }
-}
-```
-
-Then run:
-```bash
-composer update
-```
-
-### 2. Publish Configuration
+Install via Composer and run the interactive setup wizard:
 
 ```bash
-php artisan vendor:publish --tag=entra-sso-config
+composer require dcplibrary/entra-sso
+php artisan entra:install
 ```
 
-### 3. Environment Variables
+The `entra:install` command will:
+- Prompt for Azure AD credentials and add to `.env`
+- Automatically update `app/Models/User.php` to extend EntraUser
+- Fix the `casts()` method to merge with parent
+- Run migrations
+- Optionally publish config and views
 
-Add to your `.env` file:
+### Manual Installation
+
+If you prefer to set up manually:
+
+#### 1. Install Package
+
+```bash
+composer require dcplibrary/entra-sso
+```
+
+#### 2. Environment Variables
+
+The package configuration is automatically available. Just add these variables to your `.env` file:
 
 ```env
 ENTRA_TENANT_ID=your-tenant-id
@@ -60,6 +57,10 @@ ENTRA_SYNC_GROUPS=true
 ENTRA_SYNC_ON_LOGIN=true
 ENTRA_DEFAULT_ROLE=user
 
+# Group to Role Mapping (simple format)
+# Maps Azure AD group names to application roles
+ENTRA_GROUP_ROLES="IT Admins:admin,Developers:developer,Staff:user"
+
 # Token Refresh
 ENTRA_ENABLE_TOKEN_REFRESH=true
 ENTRA_REFRESH_THRESHOLD=5
@@ -68,14 +69,14 @@ ENTRA_REFRESH_THRESHOLD=5
 ENTRA_STORE_CUSTOM_CLAIMS=false
 ```
 
-### 4. Run Migrations
+#### 3. Run Migrations
 
 The package migrations will run automatically. Just run:
 ```bash
 php artisan migrate
 ```
 
-### 5. Update User Model
+#### 4. Update User Model
 
 Edit `app/Models/User.php` and make these **two required changes**:
 
@@ -149,12 +150,40 @@ class User extends EntraUser
 }
 ```
 
-### 6. (Optional) Publish Login View
+#### 5. (Optional) Publish Assets
 
-The package includes a default login view. You only need to publish it if you want to customize it:
+The package works out of the box without publishing anything. However, you can publish assets if you need to customize them:
 
+**Publish config** (only needed for advanced scenarios):
+```bash
+php artisan vendor:publish --tag=entra-sso-config
+```
+
+Publish config if you need:
+- Complex group mappings (multiple groups → one role)
+- Custom claims field mapping
+- Role model integration (e.g., Spatie Permissions)
+
+For simple group-to-role mapping, use `ENTRA_GROUP_ROLES` in `.env` instead.
+
+**Publish views** (only if you need to customize the login view):
 ```bash
 php artisan vendor:publish --tag=entra-sso-views
+```
+
+### Command Options
+
+The `entra:install` command supports several options:
+
+```bash
+# Skip User model modifications (if already done)
+php artisan entra:install --skip-user-model
+
+# Skip environment variable setup (if already configured)
+php artisan entra:install --skip-env
+
+# Force overwrite existing configuration
+php artisan entra:install --force
 ```
 
 ## Usage
@@ -179,6 +208,39 @@ Route::middleware(['auth', 'entra.group:IT Admins'])->group(function () {
 });
 ```
 
+### Group to Role Mapping
+
+Map Azure AD groups to application roles using the `.env` file:
+
+```env
+ENTRA_GROUP_ROLES="IT Admins:admin,Developers:developer,Staff:user"
+```
+
+**How it works:**
+- When a user logs in, their Azure AD groups are synced
+- Groups are matched against the `ENTRA_GROUP_ROLES` mapping
+- The first matching group sets the user's role
+- If no groups match, the `ENTRA_DEFAULT_ROLE` is used
+
+**Advanced mapping** (requires publishing config):
+
+If you need complex mappings (multiple groups → one role), publish the config:
+
+```bash
+php artisan vendor:publish --tag=entra-sso-config
+```
+
+Then edit `config/entra-sso.php`:
+
+```php
+'group_role_mapping' => [
+    'IT Admins' => 'admin',
+    'Computer Services' => 'admin',  // Multiple groups can map to same role
+    'Developers' => 'developer',
+    'Staff' => 'user',
+],
+```
+
 ## Documentation
 
 See the complete setup guide for:
@@ -187,6 +249,81 @@ See the complete setup guide for:
 - [Custom claims configuration](docs/CUSTOM_CLAIMS.md)
 - [Token refresh details](docs/TOKEN_REFRESH.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
+
+## Development
+
+### Local Package Development
+
+If you're developing this package locally and want to test changes in a Laravel application, you can use the automated setup script or do it manually.
+
+#### Option 1: Automated Setup (Recommended)
+
+1. Clone this repository alongside your Laravel app:
+```bash
+cd /path/to/your/projects
+git clone https://github.com/dcplibrary/entra-sso.git
+cd your-laravel-app
+```
+
+2. Run the development setup script:
+```bash
+bash ../entra-sso/setup-dev.sh
+```
+
+The script will:
+- Add path repository to composer.json
+- Install the package locally
+- Update User model to extend EntraUser
+- Add environment variables
+- Run migrations
+- Optionally publish config and views
+
+**Important:** The script will prompt you to manually fix the `casts()` method in `app/Models/User.php`. This is required!
+
+#### Option 2: Manual Setup
+
+1. Clone this repository alongside your Laravel app:
+```bash
+cd /path/to/your/projects
+git clone https://github.com/dcplibrary/entra-sso.git
+cd your-laravel-app
+```
+
+2. Add to your Laravel app's `composer.json`:
+```json
+{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../entra-sso"
+        }
+    ],
+    "require": {
+        "dcplibrary/entra-sso": "*"
+    }
+}
+```
+
+3. Install or update the package:
+```bash
+composer update dcplibrary/entra-sso
+```
+
+4. Follow the installation steps from the main README (environment variables, User model updates, migrations)
+
+5. Make changes in the `entra-sso` directory, then refresh in your Laravel app:
+```bash
+# Publish updated config if needed
+php artisan vendor:publish --tag=entra-sso-config --force
+
+# Clear caches
+php artisan config:clear
+php artisan cache:clear
+```
+
+### Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 
 ## License
 

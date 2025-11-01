@@ -17,19 +17,53 @@ Since this is a package (not a standalone application), there is no local build/
 composer install
 
 # The package is meant to be installed in a Laravel app via composer
-# Typical development setup uses a path repository in a parent Laravel project:
-# In the consuming Laravel app's composer.json:
+# Production: composer require dcplibrary/entra-sso
+# Development: Use path repository in parent Laravel project
+
+# For local development, in the consuming Laravel app's composer.json:
 # "repositories": [{"type": "path", "url": "./entra-sso"}]
 # "require": {"dcplibrary/entra-sso": "*"}
 
 # Then in the Laravel app:
 composer update dcplibrary/entra-sso
 
-# Publish config to test changes
+# Run interactive installation wizard (recommended)
+php artisan entra:install
+
+# Or manually:
+# Run migrations (package migrations run automatically)
+php artisan migrate
+
+# Optional: Publish config only if you need to test config customizations
 php artisan vendor:publish --tag=entra-sso-config
 
-# Run migrations
-php artisan migrate
+# Optional: Publish views only if you need to test view customizations
+php artisan vendor:publish --tag=entra-sso-views
+```
+
+## Console Commands
+
+The package provides the following Artisan commands:
+
+### `entra:install`
+Interactive installation wizard that automates the setup process:
+- Prompts for Azure AD credentials
+- Updates `.env` file with configuration
+- Automatically modifies `app/Models/User.php` to extend EntraUser
+- Fixes `casts()` method to merge with parent
+- Runs migrations
+- Optionally publishes config and views
+
+**Options:**
+- `--skip-user-model` - Skip User model modifications
+- `--skip-env` - Skip environment variable setup
+- `--force` - Overwrite existing configuration
+
+**Example:**
+```bash
+php artisan entra:install
+php artisan entra:install --skip-user-model
+php artisan entra:install --force
 ```
 
 ## Architecture
@@ -94,6 +128,22 @@ Key configuration options:
 - **Role handling**: `default_role`, `role_model` (supports both string-based and relationship-based roles)
 - **Token refresh**: `enable_token_refresh`, `refresh_threshold_minutes`
 - **Custom claims**: `custom_claims_mapping`, `store_custom_claims`
+
+**Group to Role Mapping** can be configured in two ways:
+
+1. **Simple .env mapping** (recommended for most cases):
+   ```env
+   ENTRA_GROUP_ROLES="IT Admins:admin,Developers:developer,Staff:user"
+   ```
+   - Easy to configure via environment variables
+   - No config file publishing needed
+   - Suitable for simple 1:1 group-to-role mappings
+
+2. **Config file mapping** (for advanced scenarios):
+   - Publish config: `php artisan vendor:publish --tag=entra-sso-config`
+   - Edit `config/entra-sso.php` to set `group_role_mapping` array
+   - Allows multiple groups to map to same role
+   - Supports complex mapping logic
 
 ### User Model
 The package provides a base User model (`src/Models/User.php`) that Laravel apps should extend:
