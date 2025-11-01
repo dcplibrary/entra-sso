@@ -68,38 +68,93 @@ ENTRA_REFRESH_THRESHOLD=5
 ENTRA_STORE_CUSTOM_CLAIMS=false
 ```
 
-### 4. Run Migration
+### 4. Run Migrations
 
-Copy the migration file to your Laravel app:
+The package migrations will run automatically. Just run:
 ```bash
-cp entra-sso/database/migrations/*_add_entra_fields_to_users.php database/migrations/
 php artisan migrate
 ```
 
 ### 5. Update User Model
 
-Edit `app/Models/User.php`:
+Edit `app/Models/User.php` and make these **two required changes**:
 
+**Change #1 - Import and extend the package User model:**
 ```php
-protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'entra_id',
-    'role',
-    'entra_groups',
-    'entra_custom_claims',
-];
+// Change this:
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
+class User extends Authenticatable
+
+// To this:
+use Dcplibrary\EntraSSO\Models\User as EntraUser;
+
+class User extends EntraUser
+```
+
+**Change #2 - Merge parent casts:**
+```php
+// Change this:
 protected function casts(): array
 {
     return [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'entra_groups' => 'array',
-        'entra_custom_claims' => 'array',
     ];
 }
+
+// To this:
+protected function casts(): array
+{
+    return array_merge(parent::casts(), [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ]);
+}
+```
+
+**Complete example:**
+```php
+<?php
+
+namespace App\Models;
+
+use Dcplibrary\EntraSSO\Models\User as EntraUser;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+
+class User extends EntraUser
+{
+    use HasFactory, Notifiable;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        // Note: Entra fields are automatically included via getFillable()
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected function casts(): array
+    {
+        return array_merge(parent::casts(), [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ]);
+    }
+}
+```
+
+### 6. (Optional) Publish Login View
+
+The package includes a default login view. You only need to publish it if you want to customize it:
+
+```bash
+php artisan vendor:publish --tag=entra-sso-views
 ```
 
 ## Usage
