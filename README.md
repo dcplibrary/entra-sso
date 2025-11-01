@@ -177,7 +177,33 @@ See the complete setup guide for:
 
 ### Local Package Development
 
-If you're developing this package locally and want to test changes in a Laravel application, use a path repository:
+If you're developing this package locally and want to test changes in a Laravel application, you can use the automated setup script or do it manually.
+
+#### Option 1: Automated Setup (Recommended)
+
+1. Clone this repository alongside your Laravel app:
+```bash
+cd /path/to/your/projects
+git clone https://github.com/dcplibrary/entra-sso.git
+cd your-laravel-app
+```
+
+2. Run the development setup script:
+```bash
+bash ../entra-sso/setup-dev.sh
+```
+
+The script will:
+- Add path repository to composer.json
+- Install the package locally
+- Update User model to extend EntraUser
+- Add environment variables
+- Run migrations
+- Optionally publish config and views
+
+**Important:** The script will prompt you to manually fix the `casts()` method in `app/Models/User.php`. This is required!
+
+#### Option 2: Manual Setup
 
 1. Clone this repository alongside your Laravel app:
 ```bash
@@ -206,7 +232,9 @@ cd your-laravel-app
 composer update dcplibrary/entra-sso
 ```
 
-4. Make changes in the `entra-sso` directory, then refresh in your Laravel app:
+4. Follow the installation steps from the main README (environment variables, User model updates, migrations)
+
+5. Make changes in the `entra-sso` directory, then refresh in your Laravel app:
 ```bash
 # Publish updated config if needed
 php artisan vendor:publish --tag=entra-sso-config --force
