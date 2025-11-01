@@ -15,27 +15,12 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
 
 ## Installation
 
-### 1. Add to Laravel Project
+### 1. Install Package
 
-Add to your Laravel project's `composer.json`:
+Install via Composer:
 
-```json
-{
-    "repositories": [
-        {
-            "type": "path",
-            "url": "./entra-sso"
-        }
-    ],
-    "require": {
-        "dcplibrary/entra-sso": "*"
-    }
-}
-```
-
-Then run:
 ```bash
-composer update
+composer require dcplibrary/entra-sso
 ```
 
 ### 2. Publish Configuration
@@ -187,6 +172,53 @@ See the complete setup guide for:
 - [Custom claims configuration](docs/CUSTOM_CLAIMS.md)
 - [Token refresh details](docs/TOKEN_REFRESH.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
+
+## Development
+
+### Local Package Development
+
+If you're developing this package locally and want to test changes in a Laravel application, use a path repository:
+
+1. Clone this repository alongside your Laravel app:
+```bash
+cd /path/to/your/projects
+git clone https://github.com/dcplibrary/entra-sso.git
+cd your-laravel-app
+```
+
+2. Add to your Laravel app's `composer.json`:
+```json
+{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../entra-sso"
+        }
+    ],
+    "require": {
+        "dcplibrary/entra-sso": "*"
+    }
+}
+```
+
+3. Install or update the package:
+```bash
+composer update dcplibrary/entra-sso
+```
+
+4. Make changes in the `entra-sso` directory, then refresh in your Laravel app:
+```bash
+# Publish updated config if needed
+php artisan vendor:publish --tag=entra-sso-config --force
+
+# Clear caches
+php artisan config:clear
+php artisan cache:clear
+```
+
+### Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 
 ## License
 
