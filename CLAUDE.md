@@ -129,6 +129,22 @@ Key configuration options:
 - **Token refresh**: `enable_token_refresh`, `refresh_threshold_minutes`
 - **Custom claims**: `custom_claims_mapping`, `store_custom_claims`
 
+**Group to Role Mapping** can be configured in two ways:
+
+1. **Simple .env mapping** (recommended for most cases):
+   ```env
+   ENTRA_GROUP_ROLES="IT Admins:admin,Developers:developer,Staff:user"
+   ```
+   - Easy to configure via environment variables
+   - No config file publishing needed
+   - Suitable for simple 1:1 group-to-role mappings
+
+2. **Config file mapping** (for advanced scenarios):
+   - Publish config: `php artisan vendor:publish --tag=entra-sso-config`
+   - Edit `config/entra-sso.php` to set `group_role_mapping` array
+   - Allows multiple groups to map to same role
+   - Supports complex mapping logic
+
 ### User Model
 The package provides a base User model (`src/Models/User.php`) that Laravel apps should extend:
 

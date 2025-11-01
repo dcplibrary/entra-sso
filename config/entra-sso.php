@@ -11,11 +11,27 @@ return [
     
     'sync_groups' => env('ENTRA_SYNC_GROUPS', false),
     'sync_on_login' => env('ENTRA_SYNC_ON_LOGIN', true),
-    
-    'group_role_mapping' => [
-        'Computer Services' => 'admin',
-        // 'Developers' => 'developer',
-    ],
+
+    // Group to role mapping
+    // Simple mapping via .env (recommended for most cases):
+    // ENTRA_GROUP_ROLES="IT Admins:admin,Developers:developer,Staff:user"
+    //
+    // Advanced mapping via config (publish config file if needed):
+    // 'group_role_mapping' => [
+    //     'Computer Services' => 'admin',
+    //     'Developers' => 'developer',
+    // ],
+    'group_role_mapping' => env('ENTRA_GROUP_ROLES')
+        ? collect(explode(',', env('ENTRA_GROUP_ROLES')))
+            ->mapWithKeys(function ($mapping) {
+                $parts = explode(':', trim($mapping), 2);
+                return count($parts) === 2 ? [trim($parts[0]) => trim($parts[1])] : [];
+            })
+            ->filter()
+            ->toArray()
+        : [
+            // Default mappings (used if ENTRA_GROUP_ROLES is not set and config not published)
+        ],
     
     'default_role' => env('ENTRA_DEFAULT_ROLE', 'user'),
     'role_model' => env('ENTRA_ROLE_MODEL', null),

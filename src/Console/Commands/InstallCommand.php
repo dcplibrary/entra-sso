@@ -54,7 +54,17 @@ class InstallCommand extends Command
 
         // Step 4: Optional Publishing
         $this->newLine();
-        if ($this->confirm('Publish config file for customization?', false)) {
+        $this->info('Optional: Advanced Customization');
+        $this->newLine();
+
+        // Only suggest config publishing if they might need it
+        $this->line('Config file is only needed for:');
+        $this->line('  - Complex group mappings (multiple groups to one role)');
+        $this->line('  - Custom claims mapping');
+        $this->line('  - Advanced role systems');
+        $this->newLine();
+
+        if ($this->confirm('Publish config file for advanced customization?', false)) {
             $this->call('vendor:publish', ['--tag' => 'entra-sso-config']);
             $this->info('✓ Config published to config/entra-sso.php');
         }
@@ -102,13 +112,32 @@ class InstallCommand extends Command
 
         $defaultConfig = [
             'ENTRA_AUTO_CREATE_USERS' => $this->confirm('Auto-create users on first login?', true) ? 'true' : 'false',
-            'ENTRA_SYNC_GROUPS' => $this->confirm('Sync Azure AD groups?', true) ? 'true' : 'false',
-            'ENTRA_SYNC_ON_LOGIN' => $this->confirm('Sync groups on every login?', true) ? 'true' : 'false',
-            'ENTRA_DEFAULT_ROLE' => $this->ask('Default role for new users', 'user'),
-            'ENTRA_ENABLE_TOKEN_REFRESH' => $this->confirm('Enable automatic token refresh?', true) ? 'true' : 'false',
-            'ENTRA_REFRESH_THRESHOLD' => $this->ask('Token refresh threshold (minutes)', '5'),
-            'ENTRA_STORE_CUSTOM_CLAIMS' => $this->confirm('Store custom claims?', false) ? 'true' : 'false',
         ];
+
+        // Group sync configuration
+        $syncGroups = $this->confirm('Sync Azure AD groups?', true);
+        $defaultConfig['ENTRA_SYNC_GROUPS'] = $syncGroups ? 'true' : 'false';
+
+        if ($syncGroups) {
+            $defaultConfig['ENTRA_SYNC_ON_LOGIN'] = $this->confirm('Sync groups on every login?', true) ? 'true' : 'false';
+
+            $this->newLine();
+            $this->info('Group to Role Mapping');
+            $this->line('Map Azure AD groups to application roles.');
+            $this->line('Format: "Group Name:role,Another Group:admin"');
+            $this->line('Example: "IT Admins:admin,Developers:developer,Staff:user"');
+            $this->newLine();
+
+            $groupRoles = $this->ask('Group role mappings (or leave empty for none)', $this->getEnvValue('ENTRA_GROUP_ROLES'));
+            if ($groupRoles) {
+                $defaultConfig['ENTRA_GROUP_ROLES'] = '"' . $groupRoles . '"';
+            }
+        }
+
+        $defaultConfig['ENTRA_DEFAULT_ROLE'] = $this->ask('Default role for new users', 'user');
+        $defaultConfig['ENTRA_ENABLE_TOKEN_REFRESH'] = $this->confirm('Enable automatic token refresh?', true) ? 'true' : 'false';
+        $defaultConfig['ENTRA_REFRESH_THRESHOLD'] = $this->ask('Token refresh threshold (minutes)', '5');
+        $defaultConfig['ENTRA_STORE_CUSTOM_CLAIMS'] = $this->confirm('Store custom claims?', false) ? 'true' : 'false';
 
         $allConfig = array_merge($credentials, $defaultConfig);
 

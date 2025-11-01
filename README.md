@@ -57,6 +57,10 @@ ENTRA_SYNC_GROUPS=true
 ENTRA_SYNC_ON_LOGIN=true
 ENTRA_DEFAULT_ROLE=user
 
+# Group to Role Mapping (simple format)
+# Maps Azure AD group names to application roles
+ENTRA_GROUP_ROLES="IT Admins:admin,Developers:developer,Staff:user"
+
 # Token Refresh
 ENTRA_ENABLE_TOKEN_REFRESH=true
 ENTRA_REFRESH_THRESHOLD=5
@@ -150,10 +154,17 @@ class User extends EntraUser
 
 The package works out of the box without publishing anything. However, you can publish assets if you need to customize them:
 
-**Publish config** (only if you need to customize beyond .env variables):
+**Publish config** (only needed for advanced scenarios):
 ```bash
 php artisan vendor:publish --tag=entra-sso-config
 ```
+
+Publish config if you need:
+- Complex group mappings (multiple groups → one role)
+- Custom claims field mapping
+- Role model integration (e.g., Spatie Permissions)
+
+For simple group-to-role mapping, use `ENTRA_GROUP_ROLES` in `.env` instead.
 
 **Publish views** (only if you need to customize the login view):
 ```bash
@@ -195,6 +206,39 @@ Route::middleware(['auth', 'entra.role:admin'])->group(function () {
 Route::middleware(['auth', 'entra.group:IT Admins'])->group(function () {
     Route::get('/servers', [ServerController::class, 'index']);
 });
+```
+
+### Group to Role Mapping
+
+Map Azure AD groups to application roles using the `.env` file:
+
+```env
+ENTRA_GROUP_ROLES="IT Admins:admin,Developers:developer,Staff:user"
+```
+
+**How it works:**
+- When a user logs in, their Azure AD groups are synced
+- Groups are matched against the `ENTRA_GROUP_ROLES` mapping
+- The first matching group sets the user's role
+- If no groups match, the `ENTRA_DEFAULT_ROLE` is used
+
+**Advanced mapping** (requires publishing config):
+
+If you need complex mappings (multiple groups → one role), publish the config:
+
+```bash
+php artisan vendor:publish --tag=entra-sso-config
+```
+
+Then edit `config/entra-sso.php`:
+
+```php
+'group_role_mapping' => [
+    'IT Admins' => 'admin',
+    'Computer Services' => 'admin',  // Multiple groups can map to same role
+    'Developers' => 'developer',
+    'Staff' => 'user',
+],
 ```
 
 ## Documentation
