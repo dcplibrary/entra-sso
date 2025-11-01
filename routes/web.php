@@ -10,6 +10,8 @@ Route::middleware(['web'])->group(function () {
 });
 // SSO Routes (provided by package automatically)
 // Login page
-Route::get('/login', function () {
-    return view('entra-sso::auth.login');
-})->name('login');
+Route::middleware(['web'])->group(function () {
+    Route::get('/login', function () {
+        return view('entra-sso::auth.login');
+    })->name('login');
+});
