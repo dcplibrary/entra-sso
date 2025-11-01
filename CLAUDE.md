@@ -8,6 +8,18 @@ This is a Laravel 12 package (`dcplibrary/entra-sso`) that provides Microsoft En
 
 **Package namespace**: `Dcplibrary\EntraSSO`
 
+**Requirements:**
+- PHP 8.2 or higher
+- Laravel 12.0 or higher
+- Any session driver (database, redis, file, etc.)
+- Guzzle HTTP client (automatically installed)
+
+**Framework Compatibility:**
+- ✅ Works with all Laravel frontend stacks (Blade, Livewire, Inertia/Vue, Inertia/React)
+- ✅ Compatible with existing auth systems (Breeze, Jetstream, custom auth)
+- ✅ Can be used alongside traditional email/password authentication
+- ✅ No conflicts with other packages - framework-agnostic design
+
 ## Development Commands
 
 Since this is a package (not a standalone application), there is no local build/test system. Development workflow:
@@ -293,6 +305,37 @@ Migration adds these fields to users table:
 - The callback route redirects to `/dashboard` by default on success - this may need to be configurable for different Laravel apps.
 - Group sync only happens on login (if `sync_on_login` is true) or when users are created.
 - The package uses Laravel's HTTP client (wrapper around Guzzle) for all API calls.
+
+## Common Integration Scenarios
+
+### Fresh Laravel Install
+1. Install Laravel: `composer create-project laravel/laravel app`
+2. Install package: `composer require dcplibrary/entra-sso`
+3. Run wizard: `php artisan entra:install`
+4. Done! No conflicts or special setup needed
+
+### With Laravel Breeze/Jetstream
+- Package works alongside existing auth
+- User model modification still required (wizard handles this)
+- Can keep email/password login and add SSO button
+- Or redirect `/login` to Entra SSO
+
+### With Inertia.js (Vue/React)
+- Package returns proper redirects (Inertia-compatible)
+- Auth state works with `@inertiajs/auth`
+- No special configuration needed
+- User data available via standard `auth()->user()`
+
+### With Livewire
+- No conflicts - package uses standard Laravel auth
+- User data reactive via `auth()->user()`
+- Can use `@auth` directives normally
+
+### Deployment Considerations
+- **Sessions required**: Ensure session driver configured (redis recommended for multi-server)
+- **Environment variables**: Use `.env` for credentials (don't commit)
+- **Config caching**: Works with `php artisan config:cache`
+- **Multiple instances**: Same `.env` across all servers, or use environment-specific values
 
 ## Common Customizations
 
