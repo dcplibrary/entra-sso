@@ -95,6 +95,72 @@ Key configuration options:
 - **Token refresh**: `enable_token_refresh`, `refresh_threshold_minutes`
 - **Custom claims**: `custom_claims_mapping`, `store_custom_claims`
 
+### User Model
+The package provides a base User model (`src/Models/User.php`) that Laravel apps should extend:
+
+**Package User Model** (`Dcplibrary\EntraSSO\Models\User`):
+- Extends `Illuminate\Foundation\Auth\User`
+- Provides Entra SSO-specific helper methods
+- Defines fillable: `entra_id`, `role`, `entra_groups`, `entra_custom_claims`
+- Casts `entra_groups` and `entra_custom_claims` as arrays
+
+**Helper Methods Available**:
+- `hasRole(string $role): bool` - Check if user has specific role
+- `hasAnyRole(array $roles): bool` - Check if user has any of given roles
+- `isAdmin(): bool` - Check if user is admin
+- `isManager(): bool` - Check if user is manager
+- `inGroup(string $groupName): bool` - Check if user belongs to Entra group
+- `inAnyGroup(array $groups): bool` - Check if user belongs to any of given groups
+- `getCustomClaim(string $claimName, $default = null)` - Get custom claim value
+- `hasCustomClaim(string $claimName): bool` - Check if custom claim exists
+- `getEntraGroups(): array` - Get all Entra groups
+- `getCustomClaims(): array` - Get all custom claims
+
+**App User Model Integration**:
+Laravel apps should extend the package User model and properly merge parent attributes:
+
+```php
+namespace App\Models;
+
+use Dcplibrary\EntraSSO\Models\User as EntraUser;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+
+class User extends EntraUser
+{
+    use HasFactory, Notifiable;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        // Parent fillable are NOT automatically inherited
+        // Add Entra fields if you need them mass assignable:
+        // 'entra_id', 'role', 'entra_groups', 'entra_custom_claims'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected function casts(): array
+    {
+        // IMPORTANT: Merge with parent casts to preserve Entra functionality
+        return array_merge(parent::casts(), [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ]);
+    }
+}
+```
+
+**IMPORTANT NOTES**:
+- Always merge with `parent::casts()` to preserve array casting of `entra_groups` and `entra_custom_claims`
+- The `$fillable` array is NOT inherited from parent - add Entra fields explicitly if needed for mass assignment
+- All helper methods (like `hasRole()`, `inGroup()`, etc.) are automatically available after extending
+- The package's User model can be used directly, or apps can extend it with additional traits and attributes
+
 ### Database
 Migration adds these fields to users table:
 - `entra_id` (string, unique, nullable)
@@ -130,7 +196,9 @@ Migration adds these fields to users table:
 ## Common Customizations
 
 When extending this package in a Laravel app:
-- Override `group_role_mapping` in config for organization-specific groups
-- Add custom claims mapping for organization-specific attributes
-- Extend the User model to add helper methods using `entra_groups` or `entra_custom_claims`
-- Configure `role_model` if using a package like Spatie Permission
+- **User Model**: Extend `Dcplibrary\EntraSSO\Models\User` in your app's User model (see User Model section above for proper integration)
+- **Group Mapping**: Override `group_role_mapping` in config for organization-specific groups
+- **Custom Claims**: Add custom claims mapping for organization-specific attributes via `custom_claims_mapping`
+- **Role System**: Configure `role_model` if using a package like Spatie Permission for relationship-based roles
+- **Helper Methods**: Use built-in helper methods like `hasRole()`, `inGroup()`, `getCustomClaim()` in your app logic
+- **Middleware**: Apply `entra.role` and `entra.group` middleware to protect routes based on Entra roles/groups
