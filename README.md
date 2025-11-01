@@ -15,15 +15,33 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
 
 ## Installation
 
-### 1. Install Package
+### Quick Install (Recommended)
 
-Install via Composer:
+Install via Composer and run the interactive setup wizard:
+
+```bash
+composer require dcplibrary/entra-sso
+php artisan entra:install
+```
+
+The `entra:install` command will:
+- Prompt for Azure AD credentials and add to `.env`
+- Automatically update `app/Models/User.php` to extend EntraUser
+- Fix the `casts()` method to merge with parent
+- Run migrations
+- Optionally publish config and views
+
+### Manual Installation
+
+If you prefer to set up manually:
+
+#### 1. Install Package
 
 ```bash
 composer require dcplibrary/entra-sso
 ```
 
-### 2. Environment Variables
+#### 2. Environment Variables
 
 The package configuration is automatically available. Just add these variables to your `.env` file:
 
@@ -47,14 +65,14 @@ ENTRA_REFRESH_THRESHOLD=5
 ENTRA_STORE_CUSTOM_CLAIMS=false
 ```
 
-### 3. Run Migrations
+#### 3. Run Migrations
 
 The package migrations will run automatically. Just run:
 ```bash
 php artisan migrate
 ```
 
-### 4. Update User Model
+#### 4. Update User Model
 
 Edit `app/Models/User.php` and make these **two required changes**:
 
@@ -128,7 +146,7 @@ class User extends EntraUser
 }
 ```
 
-### 5. (Optional) Publish Assets
+#### 5. (Optional) Publish Assets
 
 The package works out of the box without publishing anything. However, you can publish assets if you need to customize them:
 
@@ -140,6 +158,21 @@ php artisan vendor:publish --tag=entra-sso-config
 **Publish views** (only if you need to customize the login view):
 ```bash
 php artisan vendor:publish --tag=entra-sso-views
+```
+
+### Command Options
+
+The `entra:install` command supports several options:
+
+```bash
+# Skip User model modifications (if already done)
+php artisan entra:install --skip-user-model
+
+# Skip environment variable setup (if already configured)
+php artisan entra:install --skip-env
+
+# Force overwrite existing configuration
+php artisan entra:install --force
 ```
 
 ## Usage

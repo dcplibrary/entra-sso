@@ -27,6 +27,10 @@ composer install
 # Then in the Laravel app:
 composer update dcplibrary/entra-sso
 
+# Run interactive installation wizard (recommended)
+php artisan entra:install
+
+# Or manually:
 # Run migrations (package migrations run automatically)
 php artisan migrate
 
@@ -35,6 +39,31 @@ php artisan vendor:publish --tag=entra-sso-config
 
 # Optional: Publish views only if you need to test view customizations
 php artisan vendor:publish --tag=entra-sso-views
+```
+
+## Console Commands
+
+The package provides the following Artisan commands:
+
+### `entra:install`
+Interactive installation wizard that automates the setup process:
+- Prompts for Azure AD credentials
+- Updates `.env` file with configuration
+- Automatically modifies `app/Models/User.php` to extend EntraUser
+- Fixes `casts()` method to merge with parent
+- Runs migrations
+- Optionally publishes config and views
+
+**Options:**
+- `--skip-user-model` - Skip User model modifications
+- `--skip-env` - Skip environment variable setup
+- `--force` - Overwrite existing configuration
+
+**Example:**
+```bash
+php artisan entra:install
+php artisan entra:install --skip-user-model
+php artisan entra:install --force
 ```
 
 ## Architecture

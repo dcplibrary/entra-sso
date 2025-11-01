@@ -20,6 +20,13 @@ class EntraSSOServiceProvider extends ServiceProvider
                 config('entra-sso.redirect_uri')
             );
         });
+
+        // Register console commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Dcplibrary\EntraSSO\Console\Commands\InstallCommand::class,
+            ]);
+        }
     }
 
     public function boot()
@@ -27,6 +34,10 @@ class EntraSSOServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/entra-sso.php' => config_path('entra-sso.php'),
         ], 'entra-sso-config');
+
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/entra-sso'),
+        ], 'entra-sso-views');
 
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'entra-sso');
