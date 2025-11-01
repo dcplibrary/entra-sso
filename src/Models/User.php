@@ -36,6 +36,28 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the fillable attributes for the model.
+     *
+     * Automatically merges parent fillable with child fillable,
+     * so child models don't need to re-declare Entra fields.
+     *
+     * @return array
+     */
+    public function getFillable()
+    {
+        // Get child's fillable (from app User model)
+        $childFillable = $this->fillable;
+
+        // Merge with parent's fillable (Entra fields)
+        return array_merge($this->fillable, [
+            'entra_id',
+            'role',
+            'entra_groups',
+            'entra_custom_claims',
+        ]);
+    }
+
+    /**
      * Check if user has a specific role
      */
     public function hasRole(string $role): bool
