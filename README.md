@@ -13,6 +13,49 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
 - ✅ Configurable via environment variables
 - ✅ Works across multiple Laravel instances
 
+## Requirements
+
+- **PHP**: 8.2 or higher
+- **Laravel**: 12.0 or higher
+- **Session Driver**: Any (database, redis, file, etc.)
+- **Database**: Any supported by Laravel (MySQL, PostgreSQL, SQLite, etc.)
+
+### Framework Compatibility
+
+This package is **framework-agnostic** and works with all Laravel frontend stacks:
+
+| Framework | Compatible | Notes |
+|-----------|-----------|-------|
+| **Blade** | ✅ Yes | Native support |
+| **Livewire** | ✅ Yes | Works seamlessly |
+| **Inertia (Vue)** | ✅ Yes | Returns proper redirects |
+| **Inertia (React)** | ✅ Yes | Returns proper redirects |
+| **Laravel Breeze** | ⚠️ Partial | See note below |
+| **Laravel Jetstream** | ⚠️ Partial | See note below |
+
+**Note on Breeze/Jetstream:**
+- The package works with Breeze/Jetstream already installed
+- You can use both traditional auth AND Entra SSO side-by-side
+- The package provides its own login view at `/auth/entra`
+- You may want to add an SSO button to your existing login page
+
+### Fresh vs Existing Laravel Install
+
+**Fresh Laravel Install (Recommended):**
+```bash
+composer create-project laravel/laravel my-app
+cd my-app
+composer require dcplibrary/entra-sso
+php artisan entra:install
+```
+
+**Existing Laravel Install:**
+- ✅ Works with existing User model (gets extended automatically)
+- ✅ Works with existing authentication
+- ✅ Works with existing migrations
+- ⚠️ Backup your `app/Models/User.php` first (command creates backup)
+- ⚠️ Review the User model changes after running `entra:install`
+
 ## Installation
 
 ### Quick Install (Recommended)
@@ -206,6 +249,41 @@ Route::middleware(['auth', 'entra.role:admin'])->group(function () {
 Route::middleware(['auth', 'entra.group:IT Admins'])->group(function () {
     Route::get('/servers', [ServerController::class, 'index']);
 });
+```
+
+### Using with Existing Authentication
+
+You can use Entra SSO alongside traditional email/password authentication:
+
+**Option 1: Redirect to Entra SSO**
+```php
+// routes/web.php
+Route::get('/login', function () {
+    return redirect()->route('entra.login');
+});
+```
+
+**Option 2: Add SSO button to existing login page**
+```blade
+<!-- resources/views/auth/login.blade.php -->
+<div class="mb-4">
+    <a href="{{ route('entra.login') }}" class="btn btn-primary w-full">
+        Sign in with Microsoft
+    </a>
+</div>
+
+<div class="divider">OR</div>
+
+<!-- Your existing email/password form -->
+<form method="POST" action="{{ route('login') }}">
+    <!-- ... -->
+</form>
+```
+
+**Option 3: Use only Entra SSO**
+```php
+// config/auth.php - No changes needed!
+// The package works with Laravel's default auth setup
 ```
 
 ### Group to Role Mapping
