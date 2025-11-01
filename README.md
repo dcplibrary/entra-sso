@@ -23,15 +23,9 @@ Install via Composer:
 composer require dcplibrary/entra-sso
 ```
 
-### 2. Publish Configuration
+### 2. Environment Variables
 
-```bash
-php artisan vendor:publish --tag=entra-sso-config
-```
-
-### 3. Environment Variables
-
-Add to your `.env` file:
+The package configuration is automatically available. Just add these variables to your `.env` file:
 
 ```env
 ENTRA_TENANT_ID=your-tenant-id
@@ -53,14 +47,14 @@ ENTRA_REFRESH_THRESHOLD=5
 ENTRA_STORE_CUSTOM_CLAIMS=false
 ```
 
-### 4. Run Migrations
+### 3. Run Migrations
 
 The package migrations will run automatically. Just run:
 ```bash
 php artisan migrate
 ```
 
-### 5. Update User Model
+### 4. Update User Model
 
 Edit `app/Models/User.php` and make these **two required changes**:
 
@@ -134,10 +128,16 @@ class User extends EntraUser
 }
 ```
 
-### 6. (Optional) Publish Login View
+### 5. (Optional) Publish Assets
 
-The package includes a default login view. You only need to publish it if you want to customize it:
+The package works out of the box without publishing anything. However, you can publish assets if you need to customize them:
 
+**Publish config** (only if you need to customize beyond .env variables):
+```bash
+php artisan vendor:publish --tag=entra-sso-config
+```
+
+**Publish views** (only if you need to customize the login view):
 ```bash
 php artisan vendor:publish --tag=entra-sso-views
 ```

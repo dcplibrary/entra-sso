@@ -17,19 +17,24 @@ Since this is a package (not a standalone application), there is no local build/
 composer install
 
 # The package is meant to be installed in a Laravel app via composer
-# Typical development setup uses a path repository in a parent Laravel project:
-# In the consuming Laravel app's composer.json:
+# Production: composer require dcplibrary/entra-sso
+# Development: Use path repository in parent Laravel project
+
+# For local development, in the consuming Laravel app's composer.json:
 # "repositories": [{"type": "path", "url": "./entra-sso"}]
 # "require": {"dcplibrary/entra-sso": "*"}
 
 # Then in the Laravel app:
 composer update dcplibrary/entra-sso
 
-# Publish config to test changes
+# Run migrations (package migrations run automatically)
+php artisan migrate
+
+# Optional: Publish config only if you need to test config customizations
 php artisan vendor:publish --tag=entra-sso-config
 
-# Run migrations
-php artisan migrate
+# Optional: Publish views only if you need to test view customizations
+php artisan vendor:publish --tag=entra-sso-views
 ```
 
 ## Architecture
