@@ -134,9 +134,8 @@ class User extends EntraUser
         'name',
         'email',
         'password',
-        // Parent fillable are NOT automatically inherited
-        // Add Entra fields if you need them mass assignable:
-        // 'entra_id', 'role', 'entra_groups', 'entra_custom_claims'
+        // Note: Entra fields (entra_id, role, entra_groups, entra_custom_claims)
+        // are automatically merged via parent's getFillable() method
     ];
 
     protected $hidden = [
@@ -156,8 +155,8 @@ class User extends EntraUser
 ```
 
 **IMPORTANT NOTES**:
-- Always merge with `parent::casts()` to preserve array casting of `entra_groups` and `entra_custom_claims`
-- The `$fillable` array is NOT inherited from parent - add Entra fields explicitly if needed for mass assignment
+- **REQUIRED**: Always merge with `parent::casts()` to preserve array casting of `entra_groups` and `entra_custom_claims`
+- **Automatic**: The `$fillable` array is automatically merged via `getFillable()` - no need to add Entra fields to child model
 - All helper methods (like `hasRole()`, `inGroup()`, etc.) are automatically available after extending
 - The package's User model can be used directly, or apps can extend it with additional traits and attributes
 
