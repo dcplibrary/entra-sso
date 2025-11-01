@@ -1,3 +1,4 @@
+[![Dependabot Updates](https://github.com/dcplibrary/entra-sso/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/dcplibrary/entra-sso/actions/workflows/dependabot/dependabot-updates)
 # Entra SSO Package for Laravel
 
 A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with role mapping, group sync, token refresh, and custom claims support.
