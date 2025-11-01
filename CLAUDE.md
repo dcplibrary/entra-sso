@@ -117,7 +117,7 @@ The package provides a base User model (`src/Models/User.php`) that Laravel apps
 - `getCustomClaims(): array` - Get all custom claims
 
 **App User Model Integration**:
-Laravel apps should extend the package User model and properly merge parent attributes:
+Laravel apps should extend the package User model. **Only ONE change is required** to your default Laravel User model:
 
 ```php
 namespace App\Models;
@@ -135,7 +135,7 @@ class User extends EntraUser
         'email',
         'password',
         // Note: Entra fields (entra_id, role, entra_groups, entra_custom_claims)
-        // are automatically merged via parent's getFillable() method
+        // are automatically merged via parent's getFillable() method - no need to add them here
     ];
 
     protected $hidden = [
@@ -143,10 +143,14 @@ class User extends EntraUser
         'remember_token',
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * ⚠️ REQUIRED CHANGE: Must merge with parent::casts() to preserve Entra functionality
+     */
     protected function casts(): array
     {
-        // IMPORTANT: Merge with parent casts to preserve Entra functionality
-        return array_merge(parent::casts(), [
+        return array_merge(parent::casts(), [  // ← ADD array_merge(parent::casts(), here
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ]);
@@ -154,11 +158,40 @@ class User extends EntraUser
 }
 ```
 
-**IMPORTANT NOTES**:
-- **REQUIRED**: Always merge with `parent::casts()` to preserve array casting of `entra_groups` and `entra_custom_claims`
-- **Automatic**: The `$fillable` array is automatically merged via `getFillable()` - no need to add Entra fields to child model
-- All helper methods (like `hasRole()`, `inGroup()`, etc.) are automatically available after extending
-- The package's User model can be used directly, or apps can extend it with additional traits and attributes
+**CRITICAL: What You Must Change in Your Laravel App's User Model**:
+
+✅ **REQUIRED** - Change the `casts()` method:
+```php
+// ❌ DEFAULT Laravel - This will BREAK Entra SSO
+protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+}
+
+// ✅ REQUIRED Fix - Add array_merge(parent::casts(), ...)
+protected function casts(): array
+{
+    return array_merge(parent::casts(), [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ]);
+}
+```
+
+**Why this change is mandatory:**
+- Without `array_merge(parent::casts(), ...)`, the child class completely overrides parent casts
+- This causes `entra_groups` and `entra_custom_claims` to be returned as JSON strings instead of arrays
+- All helper methods (`inGroup()`, `hasRole()`, `getCustomClaim()`, etc.) will fail
+- There is no way for the package to prevent this override - Laravel's inheritance requires explicit merging
+
+**What you DON'T need to change:**
+- ✅ `$fillable` - Entra fields are automatically merged via the package's `getFillable()` override
+- ✅ `$hidden` - Can stay as-is
+- ✅ Class name, namespace, traits - Keep your existing setup
+- ✅ Helper methods - Automatically inherited, no need to add anything
 
 ### Database
 Migration adds these fields to users table:
