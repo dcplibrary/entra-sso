@@ -148,6 +148,7 @@ class InstallCommand extends Command
         $defaultConfig['ENTRA_ENABLE_TOKEN_REFRESH'] = $this->confirm('Enable automatic token refresh?', true) ? 'true' : 'false';
         $defaultConfig['ENTRA_REFRESH_THRESHOLD'] = $this->ask('Token refresh threshold (minutes)', '5');
         $defaultConfig['ENTRA_STORE_CUSTOM_CLAIMS'] = $this->confirm('Store custom claims?', false) ? 'true' : 'false';
+        $defaultConfig['ENTRA_REDIRECT_AFTER_LOGIN'] = $this->ask('Redirect path after login', '/entra/dashboard');
 
         $allConfig = array_merge($credentials, $defaultConfig);
 

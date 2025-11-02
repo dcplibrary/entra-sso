@@ -157,6 +157,10 @@ read -p "Tenant ID: " tenant_id
 read -p "Client ID: " client_id
 read -p "Client Secret: " client_secret
 
+# Prompt for group role mappings
+echo ""
+read -p "Enter group role mappings (optional, format: \"Group Name:role,Another:admin\"): " group_roles
+
 # Add to .env if not already present
 if grep -q "ENTRA_TENANT_ID" .env; then
     echo -e "${YELLOW}Entra configuration already in .env${NC}"
@@ -172,10 +176,19 @@ ENTRA_REDIRECT_URI="\${APP_URL}/auth/entra/callback"
 ENTRA_AUTO_CREATE_USERS=true
 ENTRA_SYNC_GROUPS=true
 ENTRA_SYNC_ON_LOGIN=true
+ENV_EOF
+
+    # Add group roles if provided
+    if [ -n "$group_roles" ]; then
+        echo "ENTRA_GROUP_ROLES=\"${group_roles}\"" >> .env
+    fi
+
+    cat >> .env << ENV_EOF
 ENTRA_DEFAULT_ROLE=user
 ENTRA_ENABLE_TOKEN_REFRESH=true
 ENTRA_REFRESH_THRESHOLD=5
 ENTRA_STORE_CUSTOM_CLAIMS=false
+ENTRA_REDIRECT_AFTER_LOGIN=/entra/dashboard
 ENV_EOF
     echo -e "${GREEN}✓ Environment variables added${NC}"
 fi
