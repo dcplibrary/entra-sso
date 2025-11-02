@@ -4,116 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - {{ config('app.name') }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .login-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 48px;
-            max-width: 400px;
-            width: 100%;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .logo h1 {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 8px;
-        }
-        .logo p {
-            color: #718096;
-            font-size: 14px;
-        }
-        .sso-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 14px 24px;
-            background: #0078d4;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-        .sso-button:hover {
-            background: #005a9e;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 120, 212, 0.3);
-        }
-        .sso-button svg {
-            margin-right: 12px;
-        }
-        .error {
-            background: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 24px 0;
-        }
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .divider span {
-            padding: 0 16px;
-            color: #718096;
-            font-size: 14px;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 24px;
-            color: #718096;
-            font-size: 12px;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="login-container">
-        <div class="logo">
-            <h1>{{ config('app.name') }}</h1>
-            <p>Sign in to continue</p>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-700 min-h-screen flex items-center justify-center p-5">
+    <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-md w-full">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ config('app.name') }}</h1>
+            <p class="text-gray-600 text-sm">Sign in to continue</p>
         </div>
 
         @if($errors->any())
-            <div class="error">
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-5 text-sm">
                 {{ $errors->first() }}
             </div>
         @endif
 
-        <a href="{{ route('entra.login') }}" class="sso-button">
-            <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <a href="{{ route('entra.login') }}" class="flex items-center justify-center w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-base transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/30">
+            <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-3">
                 <rect width="10" height="10" fill="currentColor"/>
                 <rect x="11" width="10" height="10" fill="currentColor" opacity="0.8"/>
                 <rect y="11" width="10" height="10" fill="currentColor" opacity="0.8"/>
@@ -122,7 +29,7 @@
             Sign in with Microsoft
         </a>
 
-        <div class="footer">
+        <div class="text-center mt-6 text-gray-600 text-xs">
             Secured by Azure Active Directory
         </div>
     </div>
