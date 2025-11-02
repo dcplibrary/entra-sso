@@ -92,6 +92,12 @@ class InstallCommand extends Command
         $this->line('  3. Test login at: ' . config('app.url') . '/auth/entra');
         $this->newLine();
 
+        $this->info('After login:');
+        $this->line('  - Users will be redirected to: ' . config('app.url') . '/entra/dashboard');
+        $this->line('  - The dashboard displays user info, groups, roles, and examples');
+        $this->line('  - Customize redirect: Set ENTRA_REDIRECT_AFTER_LOGIN in .env');
+        $this->newLine();
+
         return Command::SUCCESS;
     }
 

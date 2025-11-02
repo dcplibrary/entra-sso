@@ -143,6 +143,13 @@ php artisan entra:install --force
   - Group sync and role mapping during login
   - Custom claims extraction and mapping
 
+- **DashboardController** (`src/Http/Controllers/DashboardController.php`): Default landing page
+  - `index()`: Displays user info, groups, roles, and usage examples
+  - Shows Azure AD groups and group-role mappings
+  - Lists available Entra routes
+  - Provides code examples for middleware and helper methods
+  - Serves as a placeholder dashboard that can be customized
+
 ### Middleware
 Three middleware classes provide authorization:
 
@@ -172,8 +179,10 @@ Three middleware classes provide authorization:
 - `GET /auth/entra` → `entra.login` (initiates OAuth)
 - `GET /auth/entra/callback` → `entra.callback` (OAuth callback)
 - `POST /auth/entra/logout` → `entra.logout` (logout)
+- `GET /login` → Login page view (shows package's default login page)
+- `GET /entra/dashboard` → `entra.dashboard` (default landing page after login)
 
-All routes use `web` middleware group.
+All routes use `web` middleware group. The dashboard route also uses `auth` middleware.
 
 ### Configuration
 Config file: `config/entra-sso.php`
@@ -181,6 +190,7 @@ Config file: `config/entra-sso.php`
 Key configuration options:
 - **OAuth credentials**: `tenant_id`, `client_id`, `client_secret`, `redirect_uri`
 - **User management**: `auto_create_users`, `user_model`
+- **Post-login redirect**: `redirect_after_login` (default: `/entra/dashboard`)
 - **Group sync**: `sync_groups`, `sync_on_login`, `group_role_mapping`
 - **Role handling**: `default_role`, `role_model` (supports both string-based and relationship-based roles)
 - **Token refresh**: `enable_token_refresh`, `refresh_threshold_minutes`
@@ -347,7 +357,8 @@ Migration adds these fields to users table:
 - This is a **package**, not an application. Always test changes in a parent Laravel application.
 - The package auto-registers via Laravel's package discovery (`extra.laravel.providers` in `composer.json`).
 - When making changes to middleware, remember the `RefreshEntraToken` middleware is conditionally added to the global `web` group.
-- The callback route redirects to `/dashboard` by default on success - this may need to be configurable for different Laravel apps.
+- The callback route redirects to `/entra/dashboard` by default on success. This is configurable via `redirect_after_login` config option or `ENTRA_REDIRECT_AFTER_LOGIN` env variable.
+- The package provides a default dashboard at `/entra/dashboard` that displays user info, groups, roles, and usage examples. This can be customized by publishing views or by redirecting to a custom dashboard.
 - Group sync only happens on login (if `sync_on_login` is true) or when users are created.
 - The package uses Laravel's HTTP client (wrapper around Guzzle) for all API calls.
 
@@ -386,6 +397,7 @@ Migration adds these fields to users table:
 
 When extending this package in a Laravel app:
 - **User Model**: Extend `Dcplibrary\EntraSSO\Models\User` in your app's User model (see User Model section above for proper integration)
+- **Dashboard**: Customize redirect via `ENTRA_REDIRECT_AFTER_LOGIN` env variable, or publish views to customize the default dashboard appearance
 - **Group Mapping**: Override `group_role_mapping` in config for organization-specific groups
 - **Custom Claims**: Add custom claims mapping for organization-specific attributes via `custom_claims_mapping`
 - **Role System**: Configure `role_model` if using a package like Spatie Permission for relationship-based roles

@@ -16,6 +16,7 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
   - [Command Options](#command-options)
 - [Usage](#usage)
   - [Login Button](#login-button)
+  - [Default Dashboard](#default-dashboard)
   - [Protect Routes](#protect-routes)
   - [Using with Existing Authentication](#using-with-existing-authentication)
   - [Group to Role Mapping](#group-to-role-mapping)
@@ -37,6 +38,7 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
 - ✅ Easy Azure AD/Entra authentication
 - ✅ Auto-create users on first login
 - ✅ Group synchronization and role mapping
+- ✅ Built-in dashboard with user info and examples
 - ✅ Automatic token refresh for long sessions
 - ✅ Custom claims handling
 - ✅ State validation for CSRF protection
@@ -167,6 +169,9 @@ ENTRA_CLIENT_ID=your-client-id
 ENTRA_CLIENT_SECRET=your-client-secret
 ENTRA_REDIRECT_URI="${APP_URL}/auth/entra/callback"
 ENTRA_AUTO_CREATE_USERS=true
+
+# Redirect after successful login (default: /entra/dashboard)
+ENTRA_REDIRECT_AFTER_LOGIN=/entra/dashboard
 
 # Group & Role Sync
 ENTRA_SYNC_GROUPS=true
@@ -313,6 +318,58 @@ The wizard will automatically detect Breeze/Jetstream/Fortify and prompt to fix 
 
 ```blade
 <a href="{{ route('entra.login') }}">Sign in with Microsoft</a>
+```
+
+### Default Dashboard
+
+After successful login, users are redirected to a built-in dashboard at `/entra/dashboard`. This placeholder dashboard displays:
+
+- **User information** pulled from Azure AD (name, email, Entra ID, role)
+- **Azure AD groups** the user belongs to
+- **Group-to-role mappings** configured in your application
+- **Available routes** and how to protect them
+- **Code examples** for using middleware and helper methods
+
+**Customizing the redirect:**
+
+To redirect to your own dashboard instead, set this in your `.env`:
+
+```env
+ENTRA_REDIRECT_AFTER_LOGIN=/dashboard
+# or
+ENTRA_REDIRECT_AFTER_LOGIN=/admin/home
+```
+
+**Customizing the dashboard view:**
+
+To customize the default dashboard appearance:
+
+```bash
+php artisan vendor:publish --tag=entra-sso-views
+```
+
+Then edit `resources/views/vendor/entra-sso/dashboard.blade.php`.
+
+**Helper methods available on User model:**
+
+The dashboard demonstrates these helper methods you can use in your own views:
+
+```php
+// Check roles
+auth()->user()->hasRole('admin')
+auth()->user()->hasAnyRole(['admin', 'manager'])
+auth()->user()->isAdmin()
+auth()->user()->isManager()
+
+// Check groups
+auth()->user()->inGroup('IT Admins')
+auth()->user()->inAnyGroup(['Developers', 'IT Admins'])
+auth()->user()->getEntraGroups()
+
+// Access custom claims
+auth()->user()->getCustomClaim('department')
+auth()->user()->hasCustomClaim('jobTitle')
+auth()->user()->getCustomClaims()
 ```
 
 ### Protect Routes
