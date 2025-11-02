@@ -22,7 +22,7 @@ This is a Laravel 12 package (`dcplibrary/entra-sso`) that provides Microsoft En
 
 ## Development Commands
 
-Since this is a package (not a standalone application), there is no local build/test system. Development workflow:
+Since this is a package (not a standalone application), development workflow:
 
 ```bash
 # Install dependencies
@@ -51,6 +51,51 @@ php artisan vendor:publish --tag=entra-sso-config
 
 # Optional: Publish views only if you need to test view customizations
 php artisan vendor:publish --tag=entra-sso-views
+
+# Run tests
+composer test
+
+# Run tests with coverage report
+composer test-coverage
+```
+
+## Testing
+
+The package includes comprehensive tests:
+
+**Test Structure:**
+- `tests/Unit/` - Unit tests for models, middleware, config
+- `tests/Feature/` - Feature tests (to be added)
+- `tests/TestCase.php` - Base test case with Laravel setup
+
+**Running Tests:**
+```bash
+# Run all tests
+composer test
+
+# Run with coverage
+composer test-coverage
+
+# Run specific test file
+vendor/bin/phpunit tests/Unit/UserModelTest.php
+
+# Run specific test
+vendor/bin/phpunit --filter it_can_check_if_user_has_role
+```
+
+**Test Coverage:**
+- ✅ User model helper methods (hasRole, inGroup, getCustomClaim, etc.)
+- ✅ Middleware (CheckRole, CheckGroup)
+- ✅ Config parsing (group role mapping from .env)
+- ⏳ EntraSSOService (OAuth flow - requires mocking)
+- ⏳ InstallCommand (file modifications)
+
+**Writing Tests:**
+Tests use Orchestra Testbench for Laravel package testing. The `TestCase` class provides:
+- In-memory SQLite database
+- Package service provider loading
+- Laravel test helpers (actingAs, etc.)
+- Pre-configured Entra SSO settings
 ```
 
 ## Console Commands
