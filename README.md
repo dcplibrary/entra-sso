@@ -25,20 +25,52 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
 
 This package is **framework-agnostic** and works with all Laravel frontend stacks:
 
-| Framework | Compatible | Notes |
+| Starter Kit | Compatible | Notes |
 |-----------|-----------|-------|
-| **Blade** | ✅ Yes | Native support |
-| **Livewire** | ✅ Yes | Works seamlessly |
-| **Inertia (Vue)** | ✅ Yes | Returns proper redirects |
-| **Inertia (React)** | ✅ Yes | Returns proper redirects |
-| **Laravel Breeze** | ⚠️ Partial | See note below |
-| **Laravel Jetstream** | ⚠️ Partial | See note below |
+| **None (Blade only)** | ✅ Yes | Recommended - zero conflicts |
+| **React (Inertia)** | ⚠️ Conflicts | Uses Breeze auth - see note below |
+| **Vue (Inertia)** | ⚠️ Conflicts | Uses Breeze auth - see note below |
+| **Livewire** | ⚠️ Conflicts | Uses Fortify auth - see note below |
+| **Laravel Breeze** | ⚠️ Conflicts | See note below |
+| **Laravel Jetstream** | ⚠️ Conflicts | See note below |
 
-**Note on Breeze/Jetstream:**
-- The package works with Breeze/Jetstream already installed
-- You can use both traditional auth AND Entra SSO side-by-side
-- The package provides its own login view at `/auth/entra`
-- You may want to add an SSO button to your existing login page
+**⚠️ Important: Starter Kit Conflicts**
+
+Laravel starter kits provide authentication features that **conflict** with Entra SSO:
+- Competing login routes (`/login`)
+- Email verification (redundant - Azure AD verifies emails)
+- Password management (redundant - Azure AD manages passwords)
+- Two-factor authentication (redundant - Azure AD provides MFA)
+
+**All starter kits from `laravel new` include authentication**, which conflicts with Entra SSO:
+- **React** → Installs Laravel Breeze with Inertia + React
+- **Vue** → Installs Laravel Breeze with Inertia + Vue
+- **Livewire** → Installs Livewire with Fortify authentication
+
+**Recommended Installation Approaches:**
+
+**Option 1: None (No starter kit) - Recommended**
+```bash
+laravel new my-app
+# When prompted: Select "None"
+cd my-app
+composer require dcplibrary/entra-sso
+php artisan entra:install
+```
+This is the cleanest approach with zero conflicts. You can still use React/Vue/Livewire by installing them separately without auth.
+
+**Option 2: Starter kit with auto-fix**
+```bash
+laravel new my-app
+# Select React, Vue, or Livewire
+cd my-app
+composer require dcplibrary/entra-sso
+php artisan entra:install --fix-starter-kit
+```
+The install command will detect and fix authentication conflicts automatically.
+
+**Option 3: Manual installation (existing project)**
+If you already have a starter kit installed, see [Starter Kit Configuration](#starter-kit-configuration) below.
 
 ### Fresh vs Existing Laravel Install
 
@@ -220,6 +252,9 @@ php artisan vendor:publish --tag=entra-sso-views
 The `entra:install` command supports several options:
 
 ```bash
+# Automatically detect and fix starter kit conflicts
+php artisan entra:install --fix-starter-kit
+
 # Skip User model modifications (if already done)
 php artisan entra:install --skip-user-model
 
@@ -229,6 +264,8 @@ php artisan entra:install --skip-env
 # Force overwrite existing configuration
 php artisan entra:install --force
 ```
+
+The wizard will automatically detect Breeze/Jetstream/Fortify and prompt to fix conflicts.
 
 ## Usage
 
@@ -319,6 +356,103 @@ Then edit `config/entra-sso.php`:
     'Staff' => 'user',
 ],
 ```
+
+## Starter Kit Configuration
+
+If you already have a Laravel starter kit installed, you'll need to configure it to work with Entra SSO.
+
+**Auto-detection:** The `entra:install` command automatically detects and can fix these configurations. Run with `--fix-starter-kit` flag for non-interactive fixing.
+
+### React/Vue Starter Kits (Inertia + Breeze)
+
+The React and Vue options from `laravel new` install **Laravel Breeze with Inertia**. Follow the same steps as Laravel Breeze below.
+
+The `entra:install` command will automatically detect Breeze (via `routes/auth.php`) and offer to fix conflicts.
+
+### Livewire Starter Kit (Fortify)
+
+The Livewire starter kit uses Laravel Fortify for authentication. Make these changes:
+
+**1. Disable Fortify's login views** (`config/fortify.php`):
+```php
+'views' => false,  // Change from true to false
+```
+This prevents Fortify from registering its own `/login` route.
+
+**2. Remove email verification middleware** (`routes/web.php`):
+```php
+// Before:
+Route::get('/dashboard', function () {
+    //...
+})->middleware(['auth', 'verified']);
+
+// After (remove 'verified'):
+Route::get('/dashboard', function () {
+    //...
+})->middleware(['auth']);
+```
+Azure AD already verifies emails, so this middleware is redundant and blocks SSO users.
+
+**3. (Optional) Disable unused Fortify features** (`config/fortify.php`):
+```php
+'features' => [
+    // Features::registration(),     // Disabled - users created via SSO
+    // Features::resetPasswords(),   // Disabled - Azure AD manages passwords
+    // Features::emailVerification(), // Disabled - Azure AD verifies emails
+    // Features::updateProfileInformation(), // Disabled - managed via Azure AD
+    // Features::updatePasswords(),   // Disabled - Azure AD manages passwords
+    // Features::twoFactorAuthentication([  // Disabled - Azure AD provides MFA
+    //     'confirm' => true,
+    //     'confirmPassword' => true,
+    // ]),
+],
+```
+
+### Laravel Breeze
+
+**1. Remove Breeze routes** (`routes/auth.php` or `routes/web.php`):
+```php
+// Comment out or remove all Breeze auth routes
+// require __DIR__.'/auth.php';
+```
+
+**2. Redirect login to Entra** (`routes/web.php`):
+```php
+Route::get('/login', function () {
+    return redirect()->route('entra.login');
+})->name('login');
+```
+
+**3. Remove email verification middleware** (same as Fortify above).
+
+### Laravel Jetstream
+
+**1. Disable Jetstream features** (`config/jetstream.php`):
+```php
+'features' => [
+    // Features::termsAndPrivacyPolicy(),
+    // Features::profilePhotos(),
+    // Features::api(),
+    // Features::teams(['invitations' => true]),
+    // Features::accountDeletion(),
+],
+```
+
+**2. Redirect login** (same as Breeze above).
+
+**3. Remove verification middleware** (same as above).
+
+### Why These Changes Are Needed
+
+Azure AD/Entra SSO already provides:
+- ✅ **User authentication** - No need for password-based login
+- ✅ **Email verification** - Microsoft verifies all emails
+- ✅ **Password management** - Handled by Azure AD
+- ✅ **Two-factor authentication** - Azure AD provides MFA
+- ✅ **Password reset** - Managed through Azure AD portal
+- ✅ **Profile management** - Managed through Azure AD
+
+Starter kits provide these same features, creating conflicts and redundancy.
 
 ## Documentation
 

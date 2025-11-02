@@ -15,7 +15,8 @@ class InstallCommand extends Command
     protected $signature = 'entra:install
                             {--force : Overwrite existing configuration}
                             {--skip-user-model : Skip User model modifications}
-                            {--skip-env : Skip environment variable setup}';
+                            {--skip-env : Skip environment variable setup}
+                            {--fix-starter-kit : Automatically fix starter kit conflicts}';
 
     /**
      * The console command description.
@@ -43,6 +44,9 @@ class InstallCommand extends Command
         if (!$this->option('skip-user-model')) {
             $this->updateUserModel();
         }
+
+        // Step 2.5: Detect and fix starter kit conflicts
+        $this->detectAndFixStarterKits();
 
         // Step 3: Run Migrations
         if ($this->confirm('Run migrations now?', true)) {
@@ -246,6 +250,172 @@ class InstallCommand extends Command
         }
 
         $this->newLine();
+    }
+
+    /**
+     * Detect and optionally fix starter kit conflicts
+     */
+    protected function detectAndFixStarterKits()
+    {
+        $detectedKits = [];
+
+        // Detect Fortify (Livewire starter kit)
+        if (File::exists(config_path('fortify.php'))) {
+            $detectedKits[] = 'fortify';
+        }
+
+        // Detect Breeze
+        if (File::exists(base_path('routes/auth.php'))) {
+            $detectedKits[] = 'breeze';
+        }
+
+        // Detect Jetstream
+        if (File::exists(config_path('jetstream.php'))) {
+            $detectedKits[] = 'jetstream';
+        }
+
+        if (empty($detectedKits)) {
+            return; // No starter kits detected
+        }
+
+        $this->newLine();
+        $this->warn('⚠ Starter Kit Detected!');
+        $this->line('Found: ' . implode(', ', array_map('ucfirst', $detectedKits)));
+        $this->newLine();
+        $this->line('Starter kits provide authentication features that conflict with Entra SSO:');
+        $this->line('  - Email verification (Azure AD verifies emails)');
+        $this->line('  - Password management (Azure AD manages passwords)');
+        $this->line('  - Two-factor auth (Azure AD provides MFA)');
+        $this->newLine();
+
+        if ($this->option('fix-starter-kit') || $this->confirm('Automatically fix starter kit conflicts?', false)) {
+            if (in_array('fortify', $detectedKits)) {
+                $this->fixFortify();
+            }
+            if (in_array('breeze', $detectedKits)) {
+                $this->fixBreeze();
+            }
+            if (in_array('jetstream', $detectedKits)) {
+                $this->fixJetstream();
+            }
+        } else {
+            $this->warn('Skipping automatic fixes.');
+            $this->line('See documentation for manual configuration:');
+            $this->line('  https://github.com/dcplibrary/entra-sso#starter-kit-configuration');
+        }
+
+        $this->newLine();
+    }
+
+    /**
+     * Fix Fortify configuration
+     */
+    protected function fixFortify()
+    {
+        $this->line('  Fixing Fortify configuration...');
+
+        $fortifyPath = config_path('fortify.php');
+        $content = File::get($fortifyPath);
+
+        // Disable views
+        if (str_contains($content, "'views' => true")) {
+            $content = str_replace("'views' => true", "'views' => false", $content);
+            File::put($fortifyPath, $content);
+            $this->info('    ✓ Disabled Fortify login views');
+        }
+
+        // Remove verified middleware from web routes
+        $this->removeVerifiedMiddleware();
+    }
+
+    /**
+     * Fix Breeze configuration
+     */
+    protected function fixBreeze()
+    {
+        $this->line('  Fixing Breeze configuration...');
+
+        $webRoutesPath = base_path('routes/web.php');
+        $content = File::get($webRoutesPath);
+
+        // Comment out auth routes
+        if (str_contains($content, "require __DIR__.'/auth.php'") &&
+            !str_contains($content, "// require __DIR__.'/auth.php'")) {
+            $content = str_replace(
+                "require __DIR__.'/auth.php'",
+                "// require __DIR__.'/auth.php'  // Disabled - using Entra SSO",
+                $content
+            );
+            File::put($webRoutesPath, $content);
+            $this->info('    ✓ Disabled Breeze auth routes');
+        }
+
+        $this->removeVerifiedMiddleware();
+    }
+
+    /**
+     * Fix Jetstream configuration
+     */
+    protected function fixJetstream()
+    {
+        $this->line('  Fixing Jetstream configuration...');
+
+        $jetstreamPath = config_path('jetstream.php');
+
+        if (File::exists($jetstreamPath)) {
+            $content = File::get($jetstreamPath);
+
+            // Comment out features array (simple approach - just warn user)
+            $this->warn('    ⚠ Please manually disable Jetstream features in config/jetstream.php');
+            $this->line('      See: https://github.com/dcplibrary/entra-sso#laravel-jetstream');
+        }
+
+        $this->removeVerifiedMiddleware();
+    }
+
+    /**
+     * Remove verified middleware from web routes
+     */
+    protected function removeVerifiedMiddleware()
+    {
+        $webRoutesPath = base_path('routes/web.php');
+
+        if (!File::exists($webRoutesPath)) {
+            return;
+        }
+
+        $content = File::get($webRoutesPath);
+
+        // Remove 'verified' middleware
+        if (str_contains($content, "'verified'") || str_contains($content, '"verified"')) {
+            // Pattern to match middleware arrays
+            $patterns = [
+                "/middleware\(\['auth',\s*'verified'\]\)/",
+                '/middleware\(\["auth",\s*"verified"\]\)/',
+                "/middleware\(\['auth',\s*'verified',/",
+                '/->middleware\(\'verified\'\)/',
+            ];
+
+            $replacements = [
+                "middleware(['auth'])",
+                'middleware(["auth"])',
+                "middleware(['auth',",
+                '',
+            ];
+
+            $modified = false;
+            foreach ($patterns as $index => $pattern) {
+                if (preg_match($pattern, $content)) {
+                    $content = preg_replace($pattern, $replacements[$index], $content);
+                    $modified = true;
+                }
+            }
+
+            if ($modified) {
+                File::put($webRoutesPath, $content);
+                $this->info('    ✓ Removed verified middleware from routes');
+            }
+        }
     }
 
     /**

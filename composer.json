@@ -15,10 +15,23 @@
         "illuminate/http": "^12.0",
         "guzzlehttp/guzzle": "^7.2"
     },
+    "require-dev": {
+        "orchestra/testbench": "^9.0",
+        "phpunit/phpunit": "^11.0"
+    },
     "autoload": {
         "psr-4": {
             "Dcplibrary\\EntraSSO\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dcplibrary\\EntraSSO\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
     },
     "extra": {
         "laravel": {
