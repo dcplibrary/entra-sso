@@ -220,18 +220,46 @@ Route::middleware([<span class="text-green-400">'auth'</span>, <span class="text
             </div>
         </div>
 
-        <!-- Documentation -->
+        <!-- Configuration & Next Steps -->
         <div class="bg-white rounded-2xl shadow-2xl p-8 mb-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
                 </svg>
-                Next Steps
+                Customizing Your Dashboard
             </h2>
             <p class="text-gray-600 mb-4">
                 This is a placeholder dashboard provided by the Entra SSO package.
-                You can customize this view or redirect users to your own dashboard after login.
+                You can redirect users to your own custom dashboard after login by setting the <code class="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono">ENTRA_REDIRECT_AFTER_LOGIN</code> environment variable.
             </p>
+
+            <h3 class="text-base font-semibold text-gray-900 mb-3">Redirect After Login Configuration</h3>
+            <div class="code-block-container">
+                <button class="copy-button" onclick="copyCode(this, 'redirect-config')">
+                    <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="button-text">Copy</span>
+                </button>
+                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto"><code id="redirect-config"><span class="text-gray-500"># In your .env file, set the redirect URL:</span>
+<span class="text-blue-400">ENTRA_REDIRECT_AFTER_LOGIN</span>=<span class="text-green-400">/dashboard</span>
+
+<span class="text-gray-500"># Examples:</span>
+<span class="text-gray-500"># Redirect to custom dashboard</span>
+<span class="text-blue-400">ENTRA_REDIRECT_AFTER_LOGIN</span>=<span class="text-green-400">/admin/dashboard</span>
+
+<span class="text-gray-500"># Redirect to home page</span>
+<span class="text-blue-400">ENTRA_REDIRECT_AFTER_LOGIN</span>=<span class="text-green-400">/home</span>
+
+<span class="text-gray-500"># Redirect to user profile</span>
+<span class="text-blue-400">ENTRA_REDIRECT_AFTER_LOGIN</span>=<span class="text-green-400">/profile</span></code></pre>
+            </div>
+
+            <div class="mt-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded text-sm">
+                <strong class="text-blue-900">Default:</strong> If not set, users will be redirected to <code class="bg-blue-100 px-1 py-0.5 rounded text-xs">/entra/dashboard</code> (this page).
+            </div>
+
+            <h3 class="text-base font-semibold text-gray-900 mt-6 mb-3">Next Steps</h3>
             <a href="https://github.com/dcplibrary/entra-sso" target="_blank" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all hover:-translate-y-0.5">
                 View Documentation on GitHub →
             </a>
