@@ -2,6 +2,35 @@
 
 A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with role mapping, group sync, token refresh, and custom claims support.
 
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+  - [Framework Compatibility](#framework-compatibility)
+  - [Azure AD Setup](#azure-ad-setup)
+  - [Fresh vs Existing Laravel Install](#fresh-vs-existing-laravel-install)
+- [Installation](#installation)
+  - [Quick Install (Recommended)](#quick-install-recommended)
+  - [Manual Installation](#manual-installation)
+  - [Command Options](#command-options)
+- [Usage](#usage)
+  - [Login Button](#login-button)
+  - [Protect Routes](#protect-routes)
+  - [Using with Existing Authentication](#using-with-existing-authentication)
+  - [Group to Role Mapping](#group-to-role-mapping)
+  - [Custom Claims](#custom-claims)
+  - [Token Refresh](#token-refresh)
+- [Starter Kit Configuration](#starter-kit-configuration)
+  - [React/Vue Starter Kits](#reactvue-starter-kits-inertia--breeze)
+  - [Livewire Starter Kit](#livewire-starter-kit-fortify)
+  - [Laravel Breeze](#laravel-breeze)
+  - [Laravel Jetstream](#laravel-jetstream)
+- [Development](#development)
+  - [Local Package Development](#local-package-development)
+  - [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+
 ## Features
 
 - ✅ Easy Azure AD/Entra authentication
@@ -19,6 +48,17 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
 - **Laravel**: 12.0 or higher
 - **Session Driver**: Any (database, redis, file, etc.)
 - **Database**: Any supported by Laravel (MySQL, PostgreSQL, SQLite, etc.)
+
+### Azure AD Setup
+
+Before installing the package, you'll need to configure an application in Azure AD:
+
+1. Register an application in Azure AD
+2. Configure redirect URIs
+3. Generate a client secret
+4. Note your Tenant ID and Client ID
+
+**📖 Detailed setup instructions:** [Azure AD Configuration Guide](docs/AZURE_SETUP.md)
 
 ### Framework Compatibility
 
@@ -356,6 +396,43 @@ Then edit `config/entra-sso.php`:
 ],
 ```
 
+**📖 Learn more:** [Advanced Role Mapping Guide](docs/ROLE_MAPPING.md)
+
+### Custom Claims
+
+Azure AD can provide custom claims beyond standard user information (name, email). You can map these claims to your User model or store them for later use.
+
+**Configure in `.env`:**
+```env
+ENTRA_STORE_CUSTOM_CLAIMS=true
+```
+
+**Access custom claims:**
+```php
+$department = auth()->user()->getCustomClaim('department');
+$jobTitle = auth()->user()->getCustomClaim('jobTitle', 'Unknown');
+
+if (auth()->user()->hasCustomClaim('employeeId')) {
+    // User has employee ID claim
+}
+```
+
+**📖 Learn more:** [Custom Claims Configuration Guide](docs/CUSTOM_CLAIMS.md)
+
+### Token Refresh
+
+The package can automatically refresh access tokens before they expire, ensuring uninterrupted access for long sessions.
+
+**Configure in `.env`:**
+```env
+ENTRA_ENABLE_TOKEN_REFRESH=true
+ENTRA_REFRESH_THRESHOLD=5  # Refresh 5 minutes before expiry
+```
+
+Tokens are stored in the session and automatically refreshed when they're about to expire.
+
+**📖 Learn more:** [Token Refresh Details](docs/TOKEN_REFRESH.md)
+
 ## Starter Kit Configuration
 
 If you already have a Laravel starter kit installed, you'll need to configure it to work with Entra SSO.
@@ -453,15 +530,6 @@ Azure AD/Entra SSO already provides:
 
 Starter kits provide these same features, creating conflicts and redundancy.
 
-## Documentation
-
-See the complete setup guide for:
-- [Azure AD configuration](docs/AZURE_SETUP.md)
-- [Role mapping setup](docs/ROLE_MAPPING.md)
-- [Custom claims configuration](docs/CUSTOM_CLAIMS.md)
-- [Token refresh details](docs/TOKEN_REFRESH.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-
 ## Development
 
 ### Local Package Development
@@ -536,6 +604,22 @@ php artisan cache:clear
 ### Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+## Troubleshooting
+
+Having issues? Check our comprehensive troubleshooting guide:
+
+**Common issues covered:**
+- Login redirects not working
+- "Invalid state parameter" errors
+- User not being created automatically
+- Groups not syncing
+- Token refresh failures
+- Middleware permission errors
+
+**📖 Full troubleshooting guide:** [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+
+**Still stuck?** [Open an issue on GitHub](https://github.com/dcplibrary/entra-sso/issues)
 
 ## License
 
