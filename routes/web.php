@@ -11,5 +11,5 @@ Route::middleware(['web'])->group(function () {
     Route::get('/login', function () {
         return view('entra-sso::auth.login');
     })->name('login');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('entra.dashboard');
+    Route::get('/entra/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('entra.dashboard');
 });

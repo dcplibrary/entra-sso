@@ -5,9 +5,12 @@ return [
     'client_id' => env('ENTRA_CLIENT_ID'),
     'client_secret' => env('ENTRA_CLIENT_SECRET'),
     'redirect_uri' => env('ENTRA_REDIRECT_URI', env('APP_URL') . '/auth/entra/callback'),
-    
+
     'user_model' => env('ENTRA_USER_MODEL', App\Models\User::class),
     'auto_create_users' => env('ENTRA_AUTO_CREATE_USERS', true),
+
+    // Redirect after successful login
+    'redirect_after_login' => env('ENTRA_REDIRECT_AFTER_LOGIN', '/entra/dashboard'),
     
     'sync_groups' => env('ENTRA_SYNC_GROUPS', false),
     'sync_on_login' => env('ENTRA_SYNC_ON_LOGIN', true),
