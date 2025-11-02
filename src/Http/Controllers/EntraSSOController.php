@@ -55,7 +55,8 @@ class EntraSSOController extends Controller
             
             Auth::login($user);
 
-            return redirect()->intended(route('entra.dashboard'));
+            $redirectTo = config('entra-sso.redirect_after_login', '/entra/dashboard');
+            return redirect()->intended($redirectTo);
             
         } catch (\Exception $e) {
             return redirect('/login')->withErrors([
