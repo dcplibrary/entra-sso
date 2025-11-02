@@ -3,6 +3,35 @@
 
 A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with role mapping, group sync, token refresh, and custom claims support.
 
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+  - [Framework Compatibility](#framework-compatibility)
+  - [Azure AD Setup](#azure-ad-setup)
+  - [Fresh vs Existing Laravel Install](#fresh-vs-existing-laravel-install)
+- [Installation](#installation)
+  - [Quick Install (Recommended)](#quick-install-recommended)
+  - [Manual Installation](#manual-installation)
+  - [Command Options](#command-options)
+- [Usage](#usage)
+  - [Login Button](#login-button)
+  - [Protect Routes](#protect-routes)
+  - [Using with Existing Authentication](#using-with-existing-authentication)
+  - [Group to Role Mapping](#group-to-role-mapping)
+  - [Custom Claims](#custom-claims)
+  - [Token Refresh](#token-refresh)
+- [Starter Kit Configuration](#starter-kit-configuration)
+  - [React/Vue Starter Kits](#reactvue-starter-kits-inertia--breeze)
+  - [Livewire Starter Kit](#livewire-starter-kit-fortify)
+  - [Laravel Breeze](#laravel-breeze)
+  - [Laravel Jetstream](#laravel-jetstream)
+- [Development](#development)
+  - [Local Package Development](#local-package-development)
+  - [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+
 ## Features
 
 - ✅ Easy Azure AD/Entra authentication
@@ -20,6 +49,17 @@ A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with r
 - **Laravel**: 12.0 or higher
 - **Session Driver**: Any (database, redis, file, etc.)
 - **Database**: Any supported by Laravel (MySQL, PostgreSQL, SQLite, etc.)
+
+### Azure AD Setup
+
+Before installing the package, you'll need to configure an application in Azure AD:
+
+1. Register an application in Azure AD
+2. Configure redirect URIs
+3. Generate a client secret
+4. Note your Tenant ID and Client ID
+
+**📖 Detailed setup instructions:** [Azure AD Configuration Guide](docs/AZURE_SETUP.md)
 
 ### Framework Compatibility
 
@@ -456,12 +496,7 @@ Starter kits provide these same features, creating conflicts and redundancy.
 
 ## Documentation
 
-See the complete setup guide for:
-- [Azure AD configuration](docs/AZURE_SETUP.md)
-- [Role mapping setup](docs/ROLE_MAPPING.md)
-- [Custom claims configuration](docs/CUSTOM_CLAIMS.md)
-- [Token refresh details](docs/TOKEN_REFRESH.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
+Starter kits provide these same features, creating conflicts and redundancy.
 
 ## Development
 
@@ -537,6 +572,22 @@ php artisan cache:clear
 ### Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+## Troubleshooting
+
+Having issues? Check our comprehensive troubleshooting guide:
+
+**Common issues covered:**
+- Login redirects not working
+- "Invalid state parameter" errors
+- User not being created automatically
+- Groups not syncing
+- Token refresh failures
+- Middleware permission errors
+
+**📖 Full troubleshooting guide:** [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+
+**Still stuck?** [Open an issue on GitHub](https://github.com/dcplibrary/entra-sso/issues)
 
 ## License
 
