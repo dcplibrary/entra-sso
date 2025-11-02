@@ -5,6 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - {{ config('app.name') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block-container {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.375rem 0.75rem;
+            background-color: rgba(55, 65, 81, 0.8);
+            color: #9ca3af;
+            border: 1px solid rgba(75, 85, 99, 0.5);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .copy-button:hover {
+            background-color: rgba(75, 85, 99, 0.9);
+            color: #e5e7eb;
+            border-color: rgba(107, 114, 128, 0.7);
+        }
+        .copy-button.copied {
+            background-color: rgba(34, 197, 94, 0.9);
+            color: #ffffff;
+            border-color: rgba(34, 197, 94, 0.7);
+        }
+        .copy-icon {
+            width: 14px;
+            height: 14px;
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-700 min-h-screen py-10 px-5">
     <div class="max-w-6xl mx-auto">
@@ -91,10 +127,15 @@
 
             <h3 class="text-base font-semibold text-gray-900 mt-6 mb-3">Group to Role Mapping</h3>
             @if(count($groupRoleMappings) > 0)
-                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto mt-3">
-@foreach($groupRoleMappings as $group => $mappedRole)
-"{{ $group }}" => "{{ $mappedRole }}"
-@endforeach
+                <div class="code-block-container">
+                    <button class="copy-button" onclick="copyCode(this, 'mapping-code')">
+                        <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="button-text">Copy</span>
+                    </button>
+                    <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto mt-3"><code id="mapping-code">@foreach($groupRoleMappings as $group => $mappedRole)"{{ $group }}" => "{{ $mappedRole }}"
+@endforeach</code></pre>
                 </div>
                 <div class="mt-2 p-3 bg-amber-50 border-l-4 border-amber-500 rounded text-sm">
                     <strong class="text-amber-900">Example:</strong> Configure in .env: <code class="bg-amber-100 px-1 py-0.5 rounded text-xs">ENTRA_GROUP_ROLES="IT Admins:admin,Developers:developer"</code>
@@ -133,8 +174,14 @@
             @endforeach
 
             <h3 class="text-base font-semibold text-gray-900 mt-6 mb-3">Protecting Routes with Middleware</h3>
-            <div class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto">
-<span class="text-gray-500">// Protect by role</span>
+            <div class="code-block-container">
+                <button class="copy-button" onclick="copyCode(this, 'middleware-code')">
+                    <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="button-text">Copy</span>
+                </button>
+                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto"><code id="middleware-code"><span class="text-gray-500">// Protect by role</span>
 Route::middleware(<span class="text-green-400">'entra.role:admin'</span>)->group(<span class="text-purple-400">function</span> () {
     Route::get(<span class="text-green-400">'/admin'</span>, [AdminController::<span class="text-purple-400">class</span>, <span class="text-green-400">'index'</span>]);
 });
@@ -147,12 +194,18 @@ Route::middleware(<span class="text-green-400">'entra.group:IT Admins,Developers
 <span class="text-gray-500">// Multiple middleware</span>
 Route::middleware([<span class="text-green-400">'auth'</span>, <span class="text-green-400">'entra.role:manager'</span>])->group(<span class="text-purple-400">function</span> () {
     Route::get(<span class="text-green-400">'/reports'</span>, [ReportController::<span class="text-purple-400">class</span>, <span class="text-green-400">'index'</span>]);
-});
+});</code></pre>
             </div>
 
             <h3 class="text-base font-semibold text-gray-900 mt-6 mb-3">Using Helper Methods</h3>
-            <div class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto">
-<span class="text-gray-500">// Check user role</span>
+            <div class="code-block-container">
+                <button class="copy-button" onclick="copyCode(this, 'helper-code')">
+                    <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="button-text">Copy</span>
+                </button>
+                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-xs overflow-x-auto"><code id="helper-code"><span class="text-gray-500">// Check user role</span>
 @<span class="text-purple-400">if</span>(auth()->user()->hasRole(<span class="text-green-400">'admin'</span>))
     <span class="text-gray-500">// Show admin content</span>
 @<span class="text-purple-400">endif</span>
@@ -163,7 +216,7 @@ Route::middleware([<span class="text-green-400">'auth'</span>, <span class="text
 @<span class="text-purple-400">endif</span>
 
 <span class="text-gray-500">// Get custom claims</span>
-<span class="text-blue-400">$department</span> = auth()->user()->getCustomClaim(<span class="text-green-400">'department'</span>);
+<span class="text-blue-400">$department</span> = auth()->user()->getCustomClaim(<span class="text-green-400">'department'</span>);</code></pre>
             </div>
         </div>
 
@@ -184,5 +237,44 @@ Route::middleware([<span class="text-green-400">'auth'</span>, <span class="text
             </a>
         </div>
     </div>
+
+    <script>
+        function copyCode(button, codeId) {
+            const codeElement = document.getElementById(codeId);
+            const textToCopy = codeElement.textContent || codeElement.innerText;
+
+            // Create a temporary textarea element
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+
+            // Select and copy the text
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                document.execCommand('copy');
+
+                // Update button state
+                const buttonText = button.querySelector('.button-text');
+                const originalText = buttonText.textContent;
+
+                button.classList.add('copied');
+                buttonText.textContent = 'Copied!';
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    buttonText.textContent = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+    </script>
 </body>
 </html>
