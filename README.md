@@ -1,3 +1,4 @@
+[![Dependabot Updates](https://github.com/dcplibrary/entra-sso/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/dcplibrary/entra-sso/actions/workflows/dependabot/dependabot-updates) [![Semantic-Release](https://github.com/dcplibrary/entra-sso/actions/workflows/semantic-release.yml/badge.svg)](https://github.com/dcplibrary/entra-sso/actions/workflows/semantic-release.yml)
 # Entra SSO Package for Laravel
 
 A simple, reusable Entra (Azure AD) Single Sign-On package for Laravel 12 with role mapping, group sync, token refresh, and custom claims support.
@@ -396,43 +397,6 @@ Then edit `config/entra-sso.php`:
 ],
 ```
 
-**📖 Learn more:** [Advanced Role Mapping Guide](docs/ROLE_MAPPING.md)
-
-### Custom Claims
-
-Azure AD can provide custom claims beyond standard user information (name, email). You can map these claims to your User model or store them for later use.
-
-**Configure in `.env`:**
-```env
-ENTRA_STORE_CUSTOM_CLAIMS=true
-```
-
-**Access custom claims:**
-```php
-$department = auth()->user()->getCustomClaim('department');
-$jobTitle = auth()->user()->getCustomClaim('jobTitle', 'Unknown');
-
-if (auth()->user()->hasCustomClaim('employeeId')) {
-    // User has employee ID claim
-}
-```
-
-**📖 Learn more:** [Custom Claims Configuration Guide](docs/CUSTOM_CLAIMS.md)
-
-### Token Refresh
-
-The package can automatically refresh access tokens before they expire, ensuring uninterrupted access for long sessions.
-
-**Configure in `.env`:**
-```env
-ENTRA_ENABLE_TOKEN_REFRESH=true
-ENTRA_REFRESH_THRESHOLD=5  # Refresh 5 minutes before expiry
-```
-
-Tokens are stored in the session and automatically refreshed when they're about to expire.
-
-**📖 Learn more:** [Token Refresh Details](docs/TOKEN_REFRESH.md)
-
 ## Starter Kit Configuration
 
 If you already have a Laravel starter kit installed, you'll need to configure it to work with Entra SSO.
@@ -527,6 +491,10 @@ Azure AD/Entra SSO already provides:
 - ✅ **Two-factor authentication** - Azure AD provides MFA
 - ✅ **Password reset** - Managed through Azure AD portal
 - ✅ **Profile management** - Managed through Azure AD
+
+Starter kits provide these same features, creating conflicts and redundancy.
+
+## Documentation
 
 Starter kits provide these same features, creating conflicts and redundancy.
 
