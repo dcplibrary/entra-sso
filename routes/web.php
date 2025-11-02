@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Dcplibrary\EntraSSO\Http\Controllers\EntraSSOController;
+use Dcplibrary\EntraSSO\Http\Controllers\DashboardController;
 
 Route::middleware(['web'])->group(function () {
     Route::get('/auth/entra', [EntraSSOController::class, 'redirect'])->name('entra.login');
@@ -10,4 +11,5 @@ Route::middleware(['web'])->group(function () {
     Route::get('/login', function () {
         return view('entra-sso::auth.login');
     })->name('login');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('entra.dashboard');
 });
