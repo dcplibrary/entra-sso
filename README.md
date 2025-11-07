@@ -73,6 +73,10 @@ composer require dcplibrary/entra-sso
 php artisan entra:install
 ```
 
+Notes:
+- Redirect URI default: the installer sets ENTRA_REDIRECT_URI to "${APP_URL}/auth/entra/callback" so your current port (e.g., :8000) is preserved.
+- Group-to-role mapping: enter values without quotes (e.g., IT Admins:admin,Developers:developer). The installer will add the surrounding quotes in .env for you.
+
 The wizard will guide you through:
 1. Azure AD credentials setup
 2. Environment configuration

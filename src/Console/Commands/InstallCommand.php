@@ -118,7 +118,7 @@ class InstallCommand extends Command
             'ENTRA_CLIENT_ID' => $this->ask('Client ID', $this->getEnvValue('ENTRA_CLIENT_ID')),
             'ENTRA_CLIENT_SECRET' => $this->secret('Client Secret'),
             // Use APP_URL so ports (e.g., :8000) carry through across environments
-            'ENTRA_REDIRECT_URI' => $this->ask('Redirect URI', '"${APP_URL}/auth/entra/callback"'),
+            'ENTRA_REDIRECT_URI' => $this->ask('Redirect URI', chr(34) . '${APP_URL}/auth/entra/callback' . chr(34)),
         ];
 
         $defaultConfig = [
@@ -135,13 +135,19 @@ class InstallCommand extends Command
             $this->newLine();
             $this->info('Group to Role Mapping');
             $this->line('Map Azure AD groups to application roles.');
-            $this->line('Format: "Group Name:role,Another Group:admin"');
-            $this->line('Example: "IT Admins:admin,Developers:developer,Staff:user"');
+            $this->line('Format: Group Name:role,Another Group:admin');
+            $this->line('Example: IT Admins:admin,Developers:developer,Staff:user');
+            $this->line('Do not include quotes; they will be added automatically.');
             $this->newLine();
 
-            $groupRoles = $this->ask('Group role mappings (or leave empty for none)', $this->getEnvValue('ENTRA_GROUP_ROLES'));
+            $existingGroupRoles = $this->getEnvValue('ENTRA_GROUP_ROLES');
+            $existingGroupRoles = $existingGroupRoles ? trim($existingGroupRoles, "\"'") : null;
+            $groupRoles = $this->ask('Group role mappings (or leave empty for none)', $existingGroupRoles);
             if ($groupRoles) {
-                $defaultConfig['ENTRA_GROUP_ROLES'] = '"' . $groupRoles . '"';
+                $sanitized = trim($groupRoles);
+                // Strip surrounding single/double quotes if provided by the user
+                $sanitized = trim($sanitized, "\"'");
+                $defaultConfig['ENTRA_GROUP_ROLES'] = '"' . $sanitized . '"';
             }
         }
 
