@@ -117,7 +117,8 @@ class InstallCommand extends Command
             'ENTRA_TENANT_ID' => $this->ask('Tenant ID', $this->getEnvValue('ENTRA_TENANT_ID')),
             'ENTRA_CLIENT_ID' => $this->ask('Client ID', $this->getEnvValue('ENTRA_CLIENT_ID')),
             'ENTRA_CLIENT_SECRET' => $this->secret('Client Secret'),
-            'ENTRA_REDIRECT_URI' => $this->ask('Redirect URI', config('app.url') . '/auth/entra/callback'),
+            // Use APP_URL so ports (e.g., :8000) carry through across environments
+            'ENTRA_REDIRECT_URI' => $this->ask('Redirect URI', '"${APP_URL}/auth/entra/callback"'),
         ];
 
         $defaultConfig = [
